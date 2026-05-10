@@ -1,0 +1,25 @@
+Superset dashboard suggestion
+
+Connection type:
+PostgreSQL
+
+Host:
+postgres
+
+Port:
+5432
+
+Database:
+medical_dw
+
+Username:
+admin
+
+Password:
+admin123
+
+Suggested charts:
+1. articles_by_source -> bar chart
+2. articles_by_category -> pie chart
+3. top_keywords -> horizontal bar chart
+4. global_stats -> KPI cards

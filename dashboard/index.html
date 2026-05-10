@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Analytics Dashboard</title>
+  <style>
+    :root {
+      --bg: #f2ede3;
+      --panel: rgba(255, 251, 245, 0.92);
+      --panel-strong: #fffdfa;
+      --panel-soft: #f6efe3;
+      --line: rgba(34, 56, 48, 0.1);
+      --ink: #172520;
+      --muted: #62736c;
+      --brand: #0f766e;
+      --brand-deep: #0b534f;
+      --accent: #b86b21;
+      --accent-soft: rgba(184, 107, 33, 0.14);
+      --shadow: 0 28px 70px rgba(23, 34, 30, 0.11);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Aptos", "Segoe UI Variable Text", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(184, 107, 33, 0.14), transparent 32%),
+        linear-gradient(180deg, #f7f2ea 0%, #f2ede3 100%);
+    }
+
+    body { padding: 24px; }
+
+    .page-shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero,
+    .grid-panel,
+    .chart-card {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius-xl);
+    }
+
+    .hero {
+      padding: 28px 30px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      background:
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.1), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.12));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--brand-deep);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+    }
+
+    .hero h1 {
+      margin: 12px 0 10px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2rem, 3vw, 3.2rem);
+      line-height: 1.03;
+      letter-spacing: -0.04em;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 60ch;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ghost-link,
+    .brand-link {
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 12px 16px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .ghost-link {
+      border: 1px solid var(--line);
+      color: var(--ink);
+      background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(255,252,246,0.72));
+    }
+
+    .brand-link {
+      border: 1px solid rgba(15, 118, 110, 0.16);
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-deep));
+      box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+    }
+
+    .ghost-link:hover,
+    .brand-link:hover { transform: translateY(-1px); }
+
+    .status-row {
+      margin-top: 16px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .status-chip.ok { color: var(--brand-deep); background: rgba(15, 118, 110, 0.08); }
+    .status-chip.warn { color: #9a6700; background: rgba(217, 119, 6, 0.12); }
+
+    .grid-panel {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .metric {
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+    }
+
+    .metric .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .metric .value {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .metrics-note {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .chart-card {
+      padding: 22px;
+    }
+
+    .chart-card h2 {
+      margin: 0 0 6px;
+      font-size: 1.12rem;
+      letter-spacing: -0.02em;
+    }
+
+    .chart-card p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar-item {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.96rem;
+    }
+
+    .bar-head strong { font-weight: 700; }
+    .bar-head span { color: var(--muted); }
+
+    .bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.08);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--brand), #1c9a8f);
+    }
+
+    .bar-fill.alt {
+      background: linear-gradient(90deg, var(--accent), #d09153);
+    }
+
+    .keyword-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .keyword-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .keyword-chip strong { font-size: 0.92rem; }
+    .keyword-chip span { color: var(--muted); font-size: 0.86rem; }
+
+    .warning-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .empty-state {
+      min-height: 160px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed rgba(15, 118, 110, 0.22);
+      border-radius: var(--radius-lg);
+      color: var(--muted);
+      text-align: center;
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    @media (max-width: 1120px) {
+      .grid-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 760px) {
+      body { padding: 16px; }
+      .hero { padding: 22px; flex-direction: column; }
+      .hero-actions { justify-content: flex-start; }
+      .grid-panel { grid-template-columns: 1fr; padding: 20px; }
+      .chart-card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow"><span class="dot"></span> Clinical Analytics</span>
+        <h1>Medical Data Dashboard</h1>
+        <p>
+          Une vue analytique intégrée pour explorer les résultats du pipeline Bronze / Silver / Gold,
+          visualiser les indicateurs du warehouse et compléter la démonstration du chatbot par une
+          couche dashboard exploitable pour votre PFA.
+        </p>
+        <div class="status-row">
+          <div class="status-chip" id="statusChip"><span class="dot"></span> Chargement des données...</div>
+          <div class="status-chip" id="sourceChip">Source: en attente</div>
+          <div class="status-chip" id="timeChip">Mise à jour: --</div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a class="ghost-link" href="/">Retour au chatbot</a>
+        <button class="brand-link" id="refreshBtn" type="button">Actualiser les données</button>
+      </div>
+    </section>
+
+    <section class="grid-panel" id="metricsGrid">
+      <article class="metric">
+        <span class="label">Articles</span>
+        <span class="value" id="metricTotal">0</span>
+        <div class="metrics-note">Nombre total d'articles disponibles.</div>
+      </article>
+      <article class="metric">
+        <span class="label">Longueur Moyenne</span>
+        <span class="value" id="metricAvg">0</span>
+        <div class="metrics-note">Moyenne des contenus nettoyés.</div>
+      </article>
+      <article class="metric">
+        <span class="label">Sources</span>
+        <span class="value" id="metricSources">0</span>
+        <div class="metrics-note">Nombre de sources représentées.</div>
+      </article>
+      <article class="metric">
+        <span class="label">Categories</span>
+        <span class="value" id="metricCategories">0</span>
+        <div class="metrics-note">Répartition des thèmes analysés.</div>
+      </article>
+    </section>
+
+    <section class="content-grid">
+      <div class="stack">
+        <article class="chart-card">
+          <h2>Articles Par Source</h2>
+          <p>Distribution des articles collectés et consolidés par source médicale.</p>
+          <div class="bar-list" id="sourceChart"></div>
+        </article>
+
+        <article class="chart-card">
+          <h2>Top Mots-Cles</h2>
+          <p>Les mots les plus présents dans la couche Gold pour repérer rapidement les thèmes dominants.</p>
+          <div class="keyword-cloud" id="keywordCloud"></div>
+        </article>
+      </div>
+
+      <div class="stack">
+        <article class="chart-card">
+          <h2>Articles Par Categorie</h2>
+          <p>Vue synthétique de la répartition des contenus par catégorie.</p>
+          <div class="bar-list" id="categoryChart"></div>
+        </article>
+
+        <article class="chart-card">
+          <h2>Diagnostics Dashboard</h2>
+          <p>Etat de la source de données et remarques utiles pour la démonstration.</p>
+          <ul class="warning-list" id="warningList"></ul>
+          <div class="empty-state" id="warningEmpty" hidden>
+            Aucun avertissement. Les données analytiques sont disponibles et exploitables.
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const statusChip = document.getElementById("statusChip");
+    const sourceChip = document.getElementById("sourceChip");
+    const timeChip = document.getElementById("timeChip");
+    const warningList = document.getElementById("warningList");
+    const warningEmpty = document.getElementById("warningEmpty");
+
+    const metricTotal = document.getElementById("metricTotal");
+    const metricAvg = document.getElementById("metricAvg");
+    const metricSources = document.getElementById("metricSources");
+    const metricCategories = document.getElementById("metricCategories");
+
+    const sourceChart = document.getElementById("sourceChart");
+    const categoryChart = document.getElementById("categoryChart");
+    const keywordCloud = document.getElementById("keywordCloud");
+    const refreshBtn = document.getElementById("refreshBtn");
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatDate(value) {
+      if (!value) return "--";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    function setStatus(kind, text) {
+      statusChip.className = `status-chip ${kind}`.trim();
+      statusChip.innerHTML = `<span class="dot"></span> ${escapeHtml(text)}`;
+    }
+
+    function renderBars(container, rows, alt = false) {
+      container.innerHTML = "";
+      if (!rows.length) {
+        container.innerHTML = `<div class="empty-state">Aucune donnée disponible pour cette visualisation.</div>`;
+        return;
+      }
+
+      const maxValue = Math.max(...rows.map((row) => row.value), 1);
+
+      rows.forEach((row) => {
+        const item = document.createElement("div");
+        item.className = "bar-item";
+        const percent = Math.max(8, Math.round((row.value / maxValue) * 100));
+        item.innerHTML = `
+          <div class="bar-head">
+            <strong>${escapeHtml(row.label)}</strong>
+            <span>${escapeHtml(row.value)}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${alt ? "alt" : ""}" style="width:${percent}%"></div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderKeywords(rows) {
+      keywordCloud.innerHTML = "";
+      if (!rows.length) {
+        keywordCloud.innerHTML = `<div class="empty-state">Aucun mot-clé disponible.</div>`;
+        return;
+      }
+
+      rows.forEach((row) => {
+        const chip = document.createElement("div");
+        chip.className = "keyword-chip";
+        chip.innerHTML = `<strong>${escapeHtml(row.label)}</strong><span>${escapeHtml(row.value)}</span>`;
+        keywordCloud.appendChild(chip);
+      });
+    }
+
+    function renderWarnings(warnings) {
+      warningList.innerHTML = "";
+      if (!warnings.length) {
+        warningEmpty.hidden = false;
+        return;
+      }
+
+      warningEmpty.hidden = true;
+      warnings.forEach((warning) => {
+        const item = document.createElement("li");
+        item.textContent = warning;
+        warningList.appendChild(item);
+      });
+    }
+
+    async function loadDashboard() {
+      setStatus("warn", "Chargement des données...");
+      try {
+        const response = await fetch("/api/dashboard", { cache: "no-store" });
+        const data = await response.json();
+
+        metricTotal.textContent = String(data.kpis?.total_articles ?? 0);
+        metricAvg.textContent = String(data.kpis?.avg_content_length ?? 0);
+        metricSources.textContent = String(data.kpis?.source_count ?? 0);
+        metricCategories.textContent = String(data.kpis?.category_count ?? 0);
+
+        sourceChip.textContent = `Source: ${data.source_kind || "unknown"}`;
+        timeChip.textContent = `Mise à jour: ${formatDate(data.generated_at)}`;
+
+        renderBars(sourceChart, data.articles_by_source || []);
+        renderBars(categoryChart, data.articles_by_category || [], true);
+        renderKeywords(data.top_keywords || []);
+        renderWarnings(data.warnings || []);
+
+        const hasData = (data.kpis?.total_articles ?? 0) > 0;
+        setStatus(hasData ? "ok" : "warn", hasData ? "Dashboard prêt" : "Dashboard vide");
+      } catch (error) {
+        console.error(error);
+        setStatus("warn", "Impossible de charger le dashboard");
+        sourceChip.textContent = "Source: indisponible";
+        timeChip.textContent = "Mise à jour: --";
+        sourceChart.innerHTML = `<div class="empty-state">Le backend du dashboard n'a pas répondu.</div>`;
+        categoryChart.innerHTML = `<div class="empty-state">Le backend du dashboard n'a pas répondu.</div>`;
+        keywordCloud.innerHTML = `<div class="empty-state">Le backend du dashboard n'a pas répondu.</div>`;
+        warningList.innerHTML = "<li>Vérifiez PostgreSQL ou MinIO, puis rechargez la page.</li>";
+        warningEmpty.hidden = true;
+      }
+    }
+
+    refreshBtn.addEventListener("click", loadDashboard);
+    loadDashboard();
+  </script>
+</body>
+</html>

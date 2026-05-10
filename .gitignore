@@ -1,0 +1,11 @@
+.env
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+chatbot/runtime_metrics.json
+chatbot/learning_data/
+chatbot/chroma_db/
+scraping/output/
+docs/*.html
+docs/yassine_cover.png
